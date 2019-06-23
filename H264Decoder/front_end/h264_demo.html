@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>h.264 real-time decoder</title>
+	<script src="H264Decoder.js"></script>
+	<script src="H264Drawer.js"></script>
+</head>
+<body>
+	<h2>h.264 real-time decoder</h2>
+	<canvas id="canvas" width="1920" height="1080"></canvas>
+	<script type="text/javascript">
+		let canvas = document.querySelector('#canvas');
+		var wsImpl = window.WebSocket || window.MozWebSocket;
+		var ws = new wsImpl("ws://127.0.0.1:1994");
+		ws.onopen = function() {
+			console.log('Connected');
+		};
+		ws.onclose = function() {
+			alert("Broken");
+		};
+
+		decode_finish = function(){
+			console.log("decode a frame")
+		}
+		
+		!function() {
+			InitDrawer(canvas);
+		}();
+
+		ws.onmessage = function(message) {
+			DrawFrame(message, decode_finish);
+		};
+
+		window.onclose = function () {
+			ShutdownDrawer();
+		}
+	</script>
+</body>
+</html>
