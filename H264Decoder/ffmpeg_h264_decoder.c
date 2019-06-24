@@ -84,49 +84,46 @@ int init_decoder(void){
 // need to free the p_ptr & _imageData->data after decoding a frame in the js file
 EMSCRIPTEN_KEEPALIVE
 ImageData *decode_one_frame(uint8_t* p_ptr, int p_length){
-#ifdef DEBUG
-	printf("[H264 decoder] frame count:%i\n", _frameCount);
-	_frameCount++;
-#endif
-
-#ifdef DEBUG
-	// start time dianoge
-	clock_t start, stop;
-	start = clock();
-#endif
-
 	_packet.data = p_ptr;
 	_packet.size = p_length;
 
-	int send_erro = 0;
-	int receive_erro = 0;
-	do{
-		send_erro = avcodec_send_packet(_codecCtx, &_packet);
+	// int send_erro = 0;
+	// int receive_erro = 0;
+	// do{
+	// 	send_erro = avcodec_send_packet(_codecCtx, &_packet);
 
-		if (send_erro != 0){
-			// printf("[H264 decoder] send_erro:%i\n", send_erro);
-			// avcodec_flush_buffers(_codecCtx);
-			break;
-		}
-		receive_erro = avcodec_receive_frame(_codecCtx, _frameYUV);
-		if (receive_erro != 0 &&  receive_erro != 11){
-			// printf("[H264 decoder] receive_erro:%i\n", receive_erro);
-			// avcodec_flush_buffers(_codecCtx);
-			break;
-		}
-	}while (receive_erro == 11);
+	// 	if (send_erro != 0){
+	// 		// printf("[H264 decoder] send_erro:%i\n", send_erro);
+	// 		// avcodec_flush_buffers(_codecCtx);
+	// 		break;
+	// 	}
+	// 	receive_erro = avcodec_receive_frame(_codecCtx, _frameYUV);
+	// 	if (receive_erro != 0 &&  receive_erro != 11){
+	// 		// printf("[H264 decoder] receive_erro:%i\n", receive_erro);
+	// 		// avcodec_flush_buffers(_codecCtx);
+	// 		break;
+	// 	}
+	// }while (receive_erro == 11);
 
-	if (send_erro == 0&& receive_erro == 0){
-		parse_yuv420_image(_frameYUV, _imageData);
+	// if (send_erro == 0&& receive_erro == 0){
+	// 	parse_yuv420_image(_frameYUV, _imageData);
+	// }
+
+	// return _imageData;
+
+	int got_pic = -1;
+	int ret = avcodec_decode_video2(_codecCtx, _frameYUV, &got_pic, &_packet);
+	if (ret < 0){
+		return NULL;
 	}
 
-#ifdef DEBUG
-	// end time dianoge
-	stop = clock();
-	double duration = ((double)(start - stop)) / 1000;
-	printf("[H264 decoder] decode time:%lf\n", duration);
-#endif
-	return _imageData;
+	if (got_pic){
+		parse_yuv420_image(_frameYUV, _imageData);
+		return _imageData;
+	}
+	else{
+		return NULL;
+	}	
 }
 
 // // free the resource after drawing the frame
