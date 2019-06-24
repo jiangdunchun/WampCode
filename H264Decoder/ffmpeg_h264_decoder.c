@@ -21,7 +21,6 @@ typedef struct {
 AVCodec *_codec;
 AVCodecContext *_codecCtx= NULL;
 AVFrame *_frameYUV;
-AVFrame *_frameRGB;
 AVPacket _packet;
 ImageData *_imageData;
 #ifdef DEBUG
@@ -74,7 +73,6 @@ int init_decoder(void){
 	}
 
 	_frameYUV = av_frame_alloc();
-	_frameRGB = av_frame_alloc();
 
 	av_init_packet(&_packet);
 
@@ -83,7 +81,7 @@ int init_decoder(void){
 }
 
 // decode a frame
-// need to free the packet and image data after decoding a frame
+// need to free the p_ptr & _imageData->data after decoding a frame in the js file
 EMSCRIPTEN_KEEPALIVE
 ImageData *decode_one_frame(uint8_t* p_ptr, int p_length){
 #ifdef DEBUG
@@ -131,21 +129,20 @@ ImageData *decode_one_frame(uint8_t* p_ptr, int p_length){
 	return _imageData;
 }
 
-// free the resource after drawing the frame
-EMSCRIPTEN_KEEPALIVE
-int free_source(void){
-	av_free_packet(&_packet);
+// // free the resource after drawing the frame
+// EMSCRIPTEN_KEEPALIVE
+// int free_source(void){
+// 	av_free_packet(&_packet);
 
-	free(_imageData->data);
-	_imageData->data = NULL;
-	return 1;
-}
+// 	free(_imageData->data);
+// 	_imageData->data = NULL;
+// 	return 1;
+// }
 
 // shutdown the decoder
 EMSCRIPTEN_KEEPALIVE
 int shutdown_decoder(void){
 	av_frame_free(&_frameYUV);
-	av_frame_free(&_frameRGB);
 
 	avcodec_close(_codecCtx);
 	av_free(_codecCtx);

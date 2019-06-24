@@ -112,41 +112,40 @@ InitDrawer = function(canvas){
 }
 
 var count = 0;
-DrawFrame = function(message, callback){
+DrawFrame = function(message, callback = null){
     if (typeof message.data == 'blob' || message.data instanceof Blob){
         var reader = new FileReader();
         reader.readAsArrayBuffer(message.data);
         reader.onloadend = function(e){
-            let buffer = new Uint8Array(reader.result, 0, reader.result.byteLength),
-                offset = Module._malloc(buffer.length);
+            let pakBuffer = new Uint8Array(reader.result, 0, reader.result.byteLength),
+                pakBufferPtr = Module._malloc(pakBuffer.length);
 
-            Module.HEAP8.set(buffer, offset);
-            let ptr = Module.ccall("decode_one_frame", null, [typeof offset, typeof buffer.length], [offset, buffer.length]);
-                width = Module.HEAPU32[ptr / 4],
-                height = Module.HEAPU32[ptr / 4 + 1],
-                imgBufferPtr = Module.HEAPU32[ptr / 4 + 2];
+            Module.HEAP8.set(pakBuffer, pakBufferPtr);
+            let imgPtr = Module.ccall("decode_one_frame", null, [typeof pakBufferPtr, typeof pakBuffer.length], [pakBufferPtr, pakBuffer.length]);
+                imgWidth = Module.HEAPU32[imgPtr / 4],
+                imgHeight = Module.HEAPU32[imgPtr / 4 + 1],
+                imgBufferPtr = Module.HEAPU32[imgPtr / 4 + 2];
 
-            imageBuffer = Module.HEAPU8.subarray(imgBufferPtr, imgBufferPtr + width * height * 3 / 2);
+            imgBuffer = Module.HEAPU8.subarray(imgBufferPtr, imgBufferPtr + imgWidth * imgHeight * 3 / 2);
 
-            callback();
-            
-            if (width * height > 0 ){
+            if (imgWidth * imgHeight > 0 ){
                 gl.viewport(0, 0, yuvCanvas.width, yuvCanvas.height);
                 gl.clearColor(0.0, 0.0, 0.0, 0.0);
                 gl.clear(gl.COLOR_BUFFER_BIT);
 
-                gl.y.fill(width, height, imageBuffer.subarray(0, width*height));
-                gl.u.fill(width >> 1, height >> 1, imageBuffer.subarray(width*height, width*height*5/4));
-                gl.v.fill(width >> 1, height >> 1, imageBuffer.subarray(width*height*5/4, imageBuffer.length));
+                gl.y.fill(imgWidth, imgHeight, imgBuffer.subarray(0, imgWidth*imgHeight));
+                gl.u.fill(imgWidth >> 1, imgHeight >> 1, imgBuffer.subarray(imgWidth*imgHeight, imgWidth*imgHeight*5/4));
+                gl.v.fill(imgWidth >> 1, imgHeight >> 1, imgBuffer.subarray(imgWidth*imgHeight*5/4, imgBuffer.length));
 
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
             }
 
-            // Module.ccall('free_source', null, null, null);
+            Module._free(pakBufferPtr);
+            Module._free(imgBufferPtr);
 
-            // Module._free(buffer);
-            // Module._free(ptr);
-            // Module._free(imgBufferPtr);
+            if (callback != null){
+                callback();
+            }
         }
     }
 }
