@@ -11,7 +11,7 @@
 	<script type="text/javascript">
 		let canvas = document.querySelector('#canvas');
 		var wsImpl = window.WebSocket || window.MozWebSocket;
-		var ws = new wsImpl("ws://127.0.0.1:1994");
+		var ws = new wsImpl("ws://192.168.33.114:1994");
 		ws.onopen = function() {
 			console.log('Connected');
 		};
