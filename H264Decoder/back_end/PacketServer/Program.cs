@@ -37,6 +37,7 @@ namespace PacketServer
 
         static void SendThread(object param)
         {
+            Thread.Sleep(1000);
             IWebSocketConnection socket = param as IWebSocketConnection;
             if (socket == null) return;
 
@@ -53,7 +54,7 @@ namespace PacketServer
                     reader.Close();
                     break;
                 }
-                Thread.Sleep(20);
+                Thread.Sleep(40);
             }
         }
     }
