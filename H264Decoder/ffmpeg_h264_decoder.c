@@ -103,17 +103,17 @@ ImageData *decode_one_frame(uint8_t* p_ptr, int p_length){
 	do{
 		send_erro = avcodec_send_packet(_codecCtx, &_packet);
 
-		// if (send_erro != 0){
-		// 	printf("[H264 decoder] send_erro:%i\n", send_erro);
-		// 	avcodec_flush_buffers(_codecCtx);
-		// 	break;
-		// }
+		if (send_erro != 0){
+			// printf("[H264 decoder] send_erro:%i\n", send_erro);
+			// avcodec_flush_buffers(_codecCtx);
+			break;
+		}
 		receive_erro = avcodec_receive_frame(_codecCtx, _frameYUV);
-		// if (receive_erro != 0 &&  receive_erro != 11){
-		// 	printf("[H264 decoder] receive_erro:%i\n", receive_erro);
-		// 	avcodec_flush_buffers(_codecCtx);
-		// 	break;
-		// }
+		if (receive_erro != 0 &&  receive_erro != 11){
+			// printf("[H264 decoder] receive_erro:%i\n", receive_erro);
+			// avcodec_flush_buffers(_codecCtx);
+			break;
+		}
 	}while (receive_erro == 11);
 
 	if (send_erro == 0&& receive_erro == 0){
