@@ -52,8 +52,8 @@ AVHWAccel *ff_find_hwaccel(enum AVCodecID codec_id, enum AVPixelFormat pix_fmt)
 {
     AVHWAccel *hwaccel=NULL;
     
-    while((hwaccel= av_hwaccel_next(hwaccel))){
-		printf("[H264 decoder] hardware accelarationpatch with:%s\n", , hwaccel->name);
+    while((hwaccel = av_hwaccel_next(hwaccel))){
+		printf("[H264 decoder] hardware accelarationpatch with:%s\n",  hwaccel->name);
         if ( hwaccel->id == codec_id && hwaccel->pix_fmt == pix_fmt)
             return hwaccel;
     }
@@ -71,14 +71,6 @@ int init_decoder(void){
 		return -11;
 	}
 
-	_accel = ff_find_hwaccel(AV_CODEC_ID_H264, AV_PIX_FMT_YUV420P);
-	if (_accel == NULL){
-		printf("[H264 decoder] hardware accelaration not found\n");
-	}
-	else{
-		printf("[H264 decoder] hardware accelaration:%s\n", _accel->name);
-	}
-
 	_codecCtx = avcodec_alloc_context3(_codec);
 	if (!_codecCtx){
 		printf("[H264 decoder] could not allocate video codec context\n");
@@ -88,6 +80,14 @@ int init_decoder(void){
 	if (avcodec_open2(_codecCtx, _codec, NULL) < 0) {
 		printf("[H264 decoder] could not open codec\n");
 		return -14;
+	}
+
+	_accel = ff_find_hwaccel(AV_CODEC_ID_H264, AV_PIX_FMT_YUV420P);
+	if (_accel == NULL){
+		printf("[H264 decoder] hardware accelaration not found\n");
+	}
+	else{
+		printf("[H264 decoder] hardware accelaration:%s\n", _accel->name);
 	}
 
 	_frameYUV = av_frame_alloc();
