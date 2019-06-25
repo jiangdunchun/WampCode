@@ -14,7 +14,7 @@
 		var size_state = true;
 		let canvas = document.querySelector('#canvas');
 		var wsImpl = window.WebSocket || window.MozWebSocket;
-		var ws = new wsImpl("ws://192.168.33.114:2019/wamp");
+		var ws = new wsImpl("ws://192.168.33.114:2019/client");
 		ws.onopen = function() {
 			console.log('Connected');
 		};
