@@ -121,7 +121,7 @@ DrawFrame = function(message, callback = null){
                 pakBufferPtr = Module._malloc(pakBuffer.length);
 
             Module.HEAP8.set(pakBuffer, pakBufferPtr);
-            let imgPtr = Module.ccall("decode_one_frame", null, [typeof pakBufferPtr, typeof pakBuffer.length], [pakBufferPtr, pakBuffer.length]);
+            let imgPtr = Module.ccall("decode_one_frame", null, [typeof pakBufferPtr, typeof pakBuffer.length], [pakBufferPtr, pakBuffer.length]),
                 imgWidth = Module.HEAPU32[imgPtr / 4],
                 imgHeight = Module.HEAPU32[imgPtr / 4 + 1],
                 imgBufferPtr = Module.HEAPU32[imgPtr / 4 + 2];

@@ -23,9 +23,6 @@ AVCodecContext *_codecCtx= NULL;
 AVFrame *_frameYUV;
 AVPacket _packet;
 ImageData *_imageData;
-#ifdef DEBUG
-int _frameCount = 0;
-#endif
 
 // use yuv as the image data, data length is width*height*3/2
 void parse_yuv420_image(AVFrame *frame_yuv, ImageData *image_data){
@@ -81,35 +78,11 @@ int init_decoder(void){
 }
 
 // decode a frame
-// need to free the p_ptr & _imageData->data after decoding a frame in the js file
+// @ need to free the p_ptr & _imageData->data after decoding a frame in the js file
 EMSCRIPTEN_KEEPALIVE
 ImageData *decode_one_frame(uint8_t* p_ptr, int p_length){
 	_packet.data = p_ptr;
 	_packet.size = p_length;
-
-	// int send_erro = 0;
-	// int receive_erro = 0;
-	// do{
-	// 	send_erro = avcodec_send_packet(_codecCtx, &_packet);
-
-	// 	if (send_erro != 0){
-	// 		// printf("[H264 decoder] send_erro:%i\n", send_erro);
-	// 		// avcodec_flush_buffers(_codecCtx);
-	// 		break;
-	// 	}
-	// 	receive_erro = avcodec_receive_frame(_codecCtx, _frameYUV);
-	// 	if (receive_erro != 0 &&  receive_erro != 11){
-	// 		// printf("[H264 decoder] receive_erro:%i\n", receive_erro);
-	// 		// avcodec_flush_buffers(_codecCtx);
-	// 		break;
-	// 	}
-	// }while (receive_erro == 11);
-
-	// if (send_erro == 0&& receive_erro == 0){
-	// 	parse_yuv420_image(_frameYUV, _imageData);
-	// }
-
-	// return _imageData;
 
 	int got_pic = -1;
 	int ret = avcodec_decode_video2(_codecCtx, _frameYUV, &got_pic, &_packet);
@@ -125,16 +98,6 @@ ImageData *decode_one_frame(uint8_t* p_ptr, int p_length){
 		return NULL;
 	}	
 }
-
-// // free the resource after drawing the frame
-// EMSCRIPTEN_KEEPALIVE
-// int free_source(void){
-// 	av_free_packet(&_packet);
-
-// 	free(_imageData->data);
-// 	_imageData->data = NULL;
-// 	return 1;
-// }
 
 // shutdown the decoder
 EMSCRIPTEN_KEEPALIVE
@@ -159,6 +122,6 @@ int shutdown_decoder(void){
 }
 
 int main(int argc, char ** argv) {
-	printf("[H264 decoder] for WebAssembly 201906231434\n");
+	printf("[H264 decoder] for WebAssembly 201906251015\n");
 	return 1;
 }
