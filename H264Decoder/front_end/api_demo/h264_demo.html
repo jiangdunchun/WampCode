@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>h.264 real-time decoder</title>
+	<script src="H264Decoder.js"></script>
+	<script src="H264Drawer.js"></script>
+</head>
+<body>
+	<h2>h.264 real-time decoder</h2>
+	<button onclick="connect()">connect</button>
+	<button onclick="change_size()">change</button><br>
+	<canvas id="canvas" width="1920" height="1080"></canvas>
+	<script type="text/javascript">
+		var size_state = true;
+		let canvas = document.querySelector('#canvas');
+		var wsImpl = window.WebSocket || window.MozWebSocket;
+		var ws = new wsImpl("ws://192.168.33.114:2019/wamp");
+		ws.onopen = function() {
+			console.log('Connected');
+		};
+		ws.onclose = function() {
+			alert("Broken");
+		};
+		
+		!function() {
+			InitDrawer(canvas);
+		}();
+
+		function connect() {
+			ws.onmessage = function(message) {
+				DrawFrame(message, acuqireFrame);
+			};
+			ws.send("10|2|WebCommonViewportStream|RenderChanged");
+			ws.send("0|5|WebCommonViewportStream|SetCanvasSize|1920|1080");
+			ws.send("0|1|WebCommonProject|Load|盛隆2019.4.7_default");
+		};
+
+		function acuqireFrame(){
+			ws.send("0|8|WebCommonViewportStream|DecodeFinish|");
+		};
+
+		function change_size() {
+			if (size_state == true){
+				ws.send("0|5|WebCommonViewportStream|SetCanvasSize|800|600");
+			}
+			else{
+				ws.send("0|5|WebCommonViewportStream|SetCanvasSize|1920|1080");
+			}
+			size_state = !size_state;
+		};
+
+		window.onclose = function () {
+			ShutdownDrawer();
+		}
+	</script>
+</body>
+</html>
