@@ -23,6 +23,7 @@ AVCodecContext *_codecCtx= NULL;
 AVFrame *_frameYUV;
 AVPacket _packet;
 ImageData *_imageData;
+AVHWAccel *_accel;
 
 // use yuv as the image data, data length is width*height*3/2
 void parse_yuv420_image(AVFrame *frame_yuv, ImageData *image_data){
@@ -47,6 +48,19 @@ void parse_yuv420_image(AVFrame *frame_yuv, ImageData *image_data){
 	image_data->data = buffer;
 }
 
+// find the hardware acceleration of this device
+AVHWAccel *ff_find_hwaccel(enum AVCodecID codec_id, enum AVPixelFormat pix_fmt)
+{
+    AVHWAccel *hwaccel=NULL;
+    
+    while((hwaccel= av_hwaccel_next(hwaccel))){
+		printf("[H264 decoder] hardware accelarationpatch with:%s\n", , hwaccel->name);
+        if ( hwaccel->id == codec_id && hwaccel->pix_fmt == pix_fmt)
+            return hwaccel;
+    }
+    return NULL;
+}
+
 // init the decoder
 EMSCRIPTEN_KEEPALIVE
 int init_decoder(void){
@@ -56,6 +70,14 @@ int init_decoder(void){
 	if (!_codec) {
 		printf("[H264 decoder] codec not found\n");
 		return -11;
+	}
+
+	_accel = ff_find_hwaccel(AV_CODEC_ID_H264, AV_PIX_FMT_YUV420P);
+	if (_accel == NULL){
+		printf("[H264 decoder] hardware accelaration not found\n");
+	}
+	else{
+		printf("[H264 decoder] hardware accelaration:%s\n", _accel->name);
 	}
 
 	_codecCtx = avcodec_alloc_context3(_codec);
