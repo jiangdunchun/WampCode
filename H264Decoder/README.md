@@ -5,7 +5,7 @@ H264 Decoder
 H264 decoder for WebAssembly
 
 # Notice
-1. pull the [ffmpeg](https://github.com/FFmpeg/FFmpeg)
+1. clone the [ffmpeg](https://github.com/FFmpeg/FFmpeg)
 
 2. copy the lib folder to ffmpeg folder
 
