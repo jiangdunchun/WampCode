@@ -22,7 +22,6 @@ AVCodecContext *_codecCtx= NULL;
 AVFrame *_frameYUV;
 AVPacket _packet;
 ImageData *_imageData;
-AVHWAccel *_accel;
 
 // use yuv as the image data, data length is width*height*3/2
 void parse_yuv420_image(AVFrame *frame_yuv, ImageData *image_data){
