@@ -23,6 +23,19 @@ AVFrame *_frameYUV;
 AVPacket _packet;
 ImageData *_imageData;
 
+// list all supported codec in this device
+void listCodecNames() {
+	AVCodec* currentCodec = NULL;
+
+	currentCodec = av_codec_next(currentCodec);
+	while (currentCodec != NULL) {
+		if (av_codec_is_encoder(currentCodec)) {
+			printf("[H264 decoder] this device supports:%s(name), %s(long name)\n", currentCodec->name, currentCodec->long_name);
+		}
+		currentCodec = av_codec_next(currentCodec);
+	}
+}
+
 // use yuv as the image data, data length is width*height*3/2
 void parse_yuv420_image(AVFrame *frame_yuv, ImageData *image_data){
 	image_data->width = (uint32_t)frame_yuv->width;
@@ -51,7 +64,10 @@ EMSCRIPTEN_KEEPALIVE
 int init_decoder(void){
 	avcodec_register_all();
 
+	listCodecNames();
+
 	_codec = avcodec_find_decoder(AV_CODEC_ID_H264);
+	//_codec = avcodec_find_encoder_by_name("h264");
 	if (!_codec) {
 		printf("[H264 decoder] codec not found\n");
 		return -11;
